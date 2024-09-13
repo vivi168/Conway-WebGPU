@@ -27,8 +27,8 @@ abstract class ConwaySimulator {
 
   protected abstract OnInit(): Promise<Boolean>;
 
-  Simulate() {
-    this.OnSimulate();
+  async Simulate() {
+    await this.OnSimulate();
 
     this.generation++;
   }
