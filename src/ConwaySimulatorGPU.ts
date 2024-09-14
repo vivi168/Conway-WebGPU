@@ -33,8 +33,8 @@ class ConwaySimulatorGPU extends ConwaySimulator {
       label: 'compute pass',
     });
 
-    pass.setPipeline(this.pipeline!);
-    pass.setBindGroup(0, this.bindGroups![this.bindGroupIdx]);
+    pass.setPipeline(this.computePipeline!);
+    pass.setBindGroup(0, this.computeBindGroups![this.bindGroupIdx]);
     pass.dispatchWorkgroups(this.WORKGRP_CNT);
     pass.end();
 
@@ -57,6 +57,9 @@ class ConwaySimulatorGPU extends ConwaySimulator {
   }
 
   // TODO
+  /*
+    compute pass + draw Pass
+  */
   // async OnDraw() {}
 
   private async InitResources() {
@@ -100,7 +103,7 @@ class ConwaySimulatorGPU extends ConwaySimulator {
       bindGroupLayouts: [bindGroupLayout],
     });
 
-    this.pipeline = this.device.createComputePipeline({
+    this.computePipeline = this.device.createComputePipeline({
       label: 'compute pipeline',
       layout: pipelineLayout,
       compute: {
@@ -109,19 +112,28 @@ class ConwaySimulatorGPU extends ConwaySimulator {
       },
     });
 
-    const gridSizeArray = new Uint32Array([
+    const canvasSizeInfo = new Float32Array([
+      this.CANVAS_WIDTH,
+      this.CANVAS_HEIGHT,
+    ]);
+    const gridSizeInfo = new Uint32Array([
       this.GRID_WIDTH,
       this.GRID_HEIGHT,
       this.GRID_SIZE,
     ]);
 
     const gridSizeBuffer = this.device.createBuffer({
-      label: 'grid size uniform buffer',
-      size: gridSizeArray.byteLength,
+      label: 'uniform buffer',
+      size: canvasSizeInfo.byteLength + gridSizeInfo.byteLength,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
-    this.device.queue.writeBuffer(gridSizeBuffer, 0, gridSizeArray);
+    this.device.queue.writeBuffer(gridSizeBuffer, 0, canvasSizeInfo);
+    this.device.queue.writeBuffer(
+      gridSizeBuffer,
+      canvasSizeInfo.byteLength,
+      gridSizeInfo
+    );
 
     const gridByteSize = Uint32Array.BYTES_PER_ELEMENT * this.GRID_SIZE;
 
@@ -148,12 +160,12 @@ class ConwaySimulatorGPU extends ConwaySimulator {
     this.device.queue.writeBuffer(this.gridDoubleBuffer[1], 0, this.grid);
 
     this.resultBuffer = this.device.createBuffer({
-      label: 'result buffer',
+      label: 'result grid buffer',
       size: gridByteSize,
       usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
     });
 
-    this.bindGroups = [
+    this.computeBindGroups = [
       this.device.createBindGroup({
         label: 'compute bind group 0',
         layout: bindGroupLayout,
@@ -196,12 +208,14 @@ class ConwaySimulatorGPU extends ConwaySimulator {
   }
 
   private device?: GPUDevice;
-  private pipeline?: GPUComputePipeline;
+  private computePipeline?: GPUComputePipeline;
+  private renderPipeline?: GPUComputePipeline;
 
   private gridDoubleBuffer?: GPUBuffer[];
   private resultBuffer?: GPUBuffer;
 
-  private bindGroups?: GPUBindGroup[];
+  private computeBindGroups?: GPUBindGroup[];
+  private renderBindGroup?: GPUBindGroup[];
   private bindGroupIdx: number;
 
   private readonly WORKGRP_SIZE: number;

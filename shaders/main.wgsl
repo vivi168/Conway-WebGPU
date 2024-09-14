@@ -2,20 +2,28 @@ const WORKGRP_SIZE = 256u;
 const ALIVE = 1u;
 const DEAD = 0u;
 
-@group(0) @binding(0) var<uniform> gridSize: vec3u; // x = width, y = height, z = width * height
+struct Uniforms {
+    canvasWidth: f32,
+    canvasHeight: f32,
+    gridWidth: u32,
+    gridHeight: u32,
+    gridSize: u32,
+}
+
+@group(0) @binding(0) var<uniform> uniforms: Uniforms;
 @group(0) @binding(1) var<storage> curGenGrid: array<u32>;
 @group(0) @binding(2) var<storage, read_write> nextGenGrid: array<u32>;
 
-const directions = array<vec2<i32>, 8>(
-    vec2<i32>(-1, -1), vec2<i32>(0, -1), vec2<i32>(1, -1), // 0 1 2
-    vec2<i32>(-1,  0),                   vec2<i32>(1,  0), // 3 X 4
-    vec2<i32>(-1,  1), vec2<i32>(0,  1), vec2<i32>(1,  1)  // 5 6 7
+const directions = array<vec2i, 8>(
+    vec2i(-1, -1), vec2i(0, -1), vec2i(1, -1), // 0 1 2
+    vec2i(-1,  0),               vec2i(1,  0), // 3 X 4
+    vec2i(-1,  1), vec2i(0,  1), vec2i(1,  1)  // 5 6 7
 );
 
 fn NeighborCount(idx: i32) -> u32{
     var count: u32 = 0;
-    let gridWidth = i32(gridSize.x);
-    let gridHeight = i32(gridSize.y);
+    let gridWidth = i32(uniforms.gridWidth);
+    let gridHeight = i32(uniforms.gridHeight);
 
     let x = idx % gridWidth;
     let y = idx / gridWidth;
@@ -37,11 +45,10 @@ fn NeighborCount(idx: i32) -> u32{
 @compute @workgroup_size(WORKGRP_SIZE)
 fn ConwaySimulate(
     @builtin(global_invocation_id) gid: vec3u,
-    @builtin(num_workgroups) num_workgroups: vec3u,
 ) {
     let idx = gid.x;
 
-    if idx >= gridSize.z {
+    if idx >= uniforms.gridSize {
         return;
     }
 
