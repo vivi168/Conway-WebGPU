@@ -1,9 +1,9 @@
-import ConwaySimulator from './ConwaySimulator.ts';
+import ConwaySimulator, {Options} from './ConwaySimulator.ts';
 import computeShaderWGSL from '../shaders/main.wgsl?raw';
 
 class ConwaySimulatorGPU extends ConwaySimulator {
-  constructor() {
-    super();
+  constructor(options: Options) {
+    super(options);
 
     this.WORKGRP_SIZE = 256;
     this.WORKGRP_CNT = Math.ceil(this.GRID_SIZE / this.WORKGRP_SIZE);
