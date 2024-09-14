@@ -27,6 +27,9 @@ class ConwaySimulatorCPU extends ConwaySimulator {
     this.grid = nextGrid;
   }
 
+  // TODO
+  // async OnDraw() {}
+
   private NeighborCount(x: number, y: number) {
     // prettier-ignore
     const DIRECTIONS = [

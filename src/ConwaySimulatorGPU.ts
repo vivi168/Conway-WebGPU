@@ -56,6 +56,9 @@ class ConwaySimulatorGPU extends ConwaySimulator {
     this.bindGroupIdx ^= 1;
   }
 
+  // TODO
+  // async OnDraw() {}
+
   private async InitResources() {
     const adapter = await navigator.gpu?.requestAdapter();
     const device = await adapter?.requestDevice();
