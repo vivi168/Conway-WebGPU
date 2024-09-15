@@ -40,7 +40,7 @@ class ConwaySimulatorGPU extends ConwaySimulator {
     return true;
   }
 
-  async OnSimulate() {
+  OnSimulate() {
     const encoder = this.device!.createCommandEncoder({
       label: 'encoder',
     });

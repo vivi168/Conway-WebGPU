@@ -22,8 +22,8 @@ const s = urlParams.has('gpu')
   ? new ConwaySimulatorGPU(options)
   : new ConwaySimulatorCPU(options);
 
-async function Mainloop() {
-  await s.Simulate();
+function Mainloop() {
+  s.Simulate();
 
   requestAnimationFrame(Mainloop);
 }

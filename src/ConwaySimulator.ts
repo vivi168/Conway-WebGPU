@@ -28,15 +28,13 @@ abstract class ConwaySimulator {
   }
 
   async Init() {
-    const ok = await this.OnInit();
-
-    return ok;
+    return await this.OnInit();
   }
 
   protected abstract OnInit(): Promise<Boolean>;
 
-  async Simulate() {
-    await this.OnSimulate();
+  Simulate() {
+    this.OnSimulate();
 
     document.getElementById('gridSize')!.textContent =
       `${this.GRID_WIDTH}x${this.GRID_HEIGHT}`;
