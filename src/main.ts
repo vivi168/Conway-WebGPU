@@ -24,7 +24,6 @@ const s = urlParams.has('gpu')
 
 async function Mainloop() {
   await s.Simulate();
-  s.Draw();
 
   requestAnimationFrame(Mainloop);
 }

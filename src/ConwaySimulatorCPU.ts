@@ -1,11 +1,17 @@
-import ConwaySimulator, {CellState} from './ConwaySimulator.ts';
+import ConwaySimulator, {CellState, Options} from './ConwaySimulator.ts';
 
 class ConwaySimulatorCPU extends ConwaySimulator {
+  constructor(options: Options) {
+    super(options);
+
+    this.CTX = this.CANVAS.getContext('2d')!;
+  }
+
   async OnInit() {
     return true;
   }
 
-  async OnSimulate() {
+  OnSimulate() {
     /*
     Any live cell with fewer than two live neighbors dies, as if by underpopulation.
     Any live cell with two or three live neighbors lives on to the next generation.
@@ -25,10 +31,40 @@ class ConwaySimulatorCPU extends ConwaySimulator {
     }
 
     this.grid = nextGrid;
+
+    this.Draw();
   }
 
-  // TODO
-  // async OnDraw() {}
+  private Draw() {
+    const imageData = this.CTX.createImageData(
+      this.CANVAS.width,
+      this.CANVAS.height
+    );
+    const pixelData = imageData.data;
+
+    for (let y = 0; y < this.GRID_HEIGHT; y++) {
+      for (let x = 0; x < this.GRID_WIDTH; x++) {
+        const index = y * this.GRID_WIDTH + x;
+
+        if (this.grid[index] === CellState.Dead) continue;
+
+        for (let dy = 0; dy < this.SCALE; dy++) {
+          for (let dx = 0; dx < this.SCALE; dx++) {
+            const px = x * this.SCALE + dx;
+            const py = y * this.SCALE + dy;
+            const i = (py * this.CANVAS.width + px) * 4;
+
+            pixelData[i + 0] = 0;
+            pixelData[i + 1] = 0;
+            pixelData[i + 2] = 0;
+            pixelData[i + 3] = 255;
+          }
+        }
+      }
+    }
+
+    this.CTX.putImageData(imageData, 0, 0);
+  }
 
   private NeighborCount(x: number, y: number) {
     // prettier-ignore
@@ -50,6 +86,8 @@ class ConwaySimulatorCPU extends ConwaySimulator {
 
     return count;
   }
+
+  private readonly CTX: CanvasRenderingContext2D;
 }
 
 export default ConwaySimulatorCPU;

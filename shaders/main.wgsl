@@ -1,10 +1,5 @@
-const WORKGRP_SIZE = 256u;
-const ALIVE = 1u;
-const DEAD = 0u;
-
 struct Uniforms {
-    canvasWidth: f32,
-    canvasHeight: f32,
+    scale: u32,
     gridWidth: u32,
     gridHeight: u32,
     gridSize: u32,
@@ -14,6 +9,9 @@ struct Uniforms {
 @group(0) @binding(1) var<storage> curGenGrid: array<u32>;
 @group(0) @binding(2) var<storage, read_write> nextGenGrid: array<u32>;
 
+const WORKGRP_SIZE = 256u;
+const DEAD = 0u;
+const ALIVE = 1u;
 const directions = array<vec2i, 8>(
     vec2i(-1, -1), vec2i(0, -1), vec2i(1, -1), // 0 1 2
     vec2i(-1,  0),               vec2i(1,  0), // 3 X 4
@@ -55,7 +53,6 @@ fn ConwaySimulate(
     let n = NeighborCount(i32(idx));
 
     var curValue = curGenGrid[idx];
-    var newValue = DEAD;
 
     /*
     Any live cell with fewer than two live neighbors dies, as if by underpopulation.
@@ -63,6 +60,8 @@ fn ConwaySimulate(
     Any live cell with more than three live neighbors dies, as if by overpopulation.
     Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
     */
+    var newValue = DEAD;
+
     if (curValue == 1 && n == 2) || n == 3 {
         newValue = ALIVE;
     }
